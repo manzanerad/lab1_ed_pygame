@@ -1,1 +1,1 @@
-# lab1_ed_pygame
+Lab 1 estructura de datos

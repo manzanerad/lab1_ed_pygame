@@ -1,5 +1,7 @@
 {
   "player": "pepito",
   "volume": 80,
-  "difficulty": "normal"
+  "difficulty": "normal",
+  "screen_width": 800,
+  "screen_height": 600
 }
