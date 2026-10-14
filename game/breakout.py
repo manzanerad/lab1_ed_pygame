@@ -4,16 +4,16 @@ from telemetry.writer import EventLogWriter
 
 
 class Breakout:
-    def __init__(self, cfg):
-        pygame.init()
+    def __init__(self, screen, clock, cfg):
+        self.screen = screen
+        self.clock = clock
         self.cfg = cfg
         self.width = cfg["screen_width"]
         self.height = cfg["screen_height"]
-        self.screen = pygame.display.set_mode((self.width, self.height))
-        pygame.display.set_caption("Breakout Telemetry")
-        self.clock = pygame.time.Clock()
         self.font = pygame.font.SysFont("monospace", 20)
-        self.writer = EventLogWriter(buffer_size=5)
+        self.writer = EventLogWriter(
+            buffer_size=cfg.get("buffer_size", 10)
+        )
         self.reset_game()
         self.writer.log("SESSION_START", {
             "player": cfg["player"],
@@ -59,11 +59,12 @@ class Breakout:
 
     def run(self):
         while self.running:
-            dt = self.clock.tick(60)
+            self.clock.tick(60)
             self.handle_events()
             self.update()
             self.draw()
         self.writer.close()
+        return "menu"
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -86,13 +87,11 @@ class Breakout:
         self.ball_x += self.ball_vx
         self.ball_y += self.ball_vy
 
-        # Rebotes paredes
         if self.ball_x <= self.ball_r or self.ball_x >= self.width - self.ball_r:
             self.ball_vx *= -1
         if self.ball_y <= self.ball_r:
             self.ball_vy *= -1
 
-        # Paleta
         paddle = pygame.Rect(self.paddle_x, self.paddle_y, self.paddle_w, self.paddle_h)
         ball = pygame.Rect(self.ball_x - self.ball_r, self.ball_y - self.ball_r,
                            self.ball_r * 2, self.ball_r * 2)
@@ -101,7 +100,6 @@ class Breakout:
             offset = (self.ball_x - (self.paddle_x + self.paddle_w / 2)) / (self.paddle_w / 2)
             self.ball_vx = self.ball_speed * offset
 
-        # Ladrillos
         for brick in self.bricks[:]:
             if ball.colliderect(brick):
                 self.bricks.remove(brick)
@@ -113,7 +111,6 @@ class Breakout:
                 })
                 break
 
-        # Bola cae
         if self.ball_y > self.height:
             self.lives -= 1
             self.writer.log("DAMAGE_TAKEN", {
@@ -130,7 +127,6 @@ class Breakout:
             else:
                 self.reset_ball()
 
-        # Siguiente nivel
         if not self.bricks:
             self.level += 1
             self.writer.log("LEVEL_UP", {
@@ -164,16 +160,3 @@ class Breakout:
         )
         self.screen.blit(text, (10, 10))
         pygame.display.flip()
-
-
-
-
-
-
-
-
-
-
-
-
-
