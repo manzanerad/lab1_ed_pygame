@@ -31,9 +31,13 @@ class EventLogWriter:
 
     def _open_current(self):
         candidates = sorted(glob.glob(os.path.join(self.log_dir, "events_*.log")))
-        path = candidates[-1] if candidates else self._next_file_path()
+        if candidates and os.path.getsize(candidates[-1]) < self.max_size_bytes:
+            path = candidates[-1]
+        else:
+            path = self._next_file_path()
         self._current_path = path
         self._current_file = open(path, "a", encoding="utf-8")
+
 
     def _rotate_if_needed(self):
         if self._current_path is None or not os.path.exists(self._current_path):

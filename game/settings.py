@@ -6,7 +6,9 @@ CONFIG_PATH = "config.json"
 
 def load_config():
     if not os.path.exists(CONFIG_PATH):
-        return _default_config()
+        cfg = _default_config()
+        save_config(cfg)
+        return cfg
     with open(CONFIG_PATH, "r", encoding="utf-8") as f:
         return json.load(f)
 
@@ -18,16 +20,10 @@ def save_config(cfg):
 
 def _default_config():
     return {
-        "player": "ana",
+        "player": "player",
         "volume": 80,
         "difficulty": "normal",
         "screen_width": 800,
         "screen_height": 600,
+        "buffer_size": 10
     }
-
-
-
-
-
-
-
